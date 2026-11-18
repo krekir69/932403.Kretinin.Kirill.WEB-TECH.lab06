@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список задач </title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+</head>
+<body>
+    <h1>Список задач (PWA)</h1>
+    <p><a href="/about">О себе</a></p>
+    <h3>API:</h3>
+    <ul>
+        <li><a href="/api/tasks">GET /api/tasks</a></li>
+        <li><a href="/api/tasks?completed=true">GET /api/tasks?completed=true</a></li>
+    </ul>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW зарегистрирован:', reg.scope))
+                    .catch(err => console.error('Ошибка SW:', err));
+            });
+        }
+    </script>
+</body>
+</html>
