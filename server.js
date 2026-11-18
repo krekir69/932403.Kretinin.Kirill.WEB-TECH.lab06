@@ -31,7 +31,7 @@ app.get('/api/tasks', (req, res) => {
 });
 
 app.post('/api/tasks', (req, res) => {
-    const { title } = req.body;
+    const { title, completed } = req.body;
 
     if (!title || typeof title !== 'string' || title.trim() === '') {
         return res.status(400).json({ error: 'Title is required' });
@@ -40,7 +40,7 @@ app.post('/api/tasks', (req, res) => {
     const newTask = {
         id: currentId++,
         title: title.trim(),
-        completed: false
+        completed: completed === true ? true : false
     };
 
     tasks.push(newTask);

@@ -3,27 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список задач </title>
+    <title>Список задач</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4CAF50">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>Список задач (PWA)</h1>
+    <h1>Список задач</h1>
     <p><a href="/about">О себе</a></p>
-    <h3>API:</h3>
-    <ul>
-        <li><a href="/api/tasks">GET /api/tasks</a></li>
-        <li><a href="/api/tasks?completed=true">GET /api/tasks?completed=true</a></li>
-    </ul>
+
+    <h3>Добавить задачу:</h3>
+    <div class="form">
+        <input type="text" id="title" placeholder="Название задачи">
+        <label>
+            <input type="checkbox" id="completed">
+            Выполнено
+        </label>
+        <button onclick="addTask()">Добавить</button>
+    </div>
+
+    <h3>Мои задачи:</h3>
+    <ul id="list"></ul>
+
+    <div class="links">
+        <h3>API:</h3>
+        <ul>
+            <li><a href="/api/tasks">GET /api/tasks</a></li>
+            <li><a href="/api/tasks?completed=true">GET /api/tasks?completed=true</a></li>
+            <li><a href="/api/tasks?completed=false">GET /api/tasks?completed=false</a></li>
+        </ul>
+    </div>
 
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW зарегистрирован:', reg.scope))
-                    .catch(err => console.error('Ошибка SW:', err));
-            });
+            navigator.serviceWorker.register('/sw.js');
         }
+
+        function loadTasks() {
+            fetch('/api/tasks')
+                .then(r => r.json())
+                .then(tasks => {
+                    const list = document.getElementById('list');
+                    list.innerHTML = '';
+                    if (tasks.length === 0) {
+                        list.innerHTML = '<li>Задач пока нет</li>';
+                        return;
+                    }
+                    tasks.forEach(t => {
+                        const li = document.createElement('li');
+                        li.textContent = t.title;
+                        if (t.completed) {
+                            li.classList.add('done');
+                            li.textContent = '✅ ' + li.textContent;
+                        } else {
+                            li.textContent = '⬜ ' + li.textContent;
+                        }
+                        list.appendChild(li);
+                    });
+                });
+        }
+
+        function addTask() {
+            const title = document.getElementById('title').value.trim();
+            const completed = document.getElementById('completed').checked;
+
+            if (!title) {
+                alert('Введите название задачи');
+                return;
+            }
+
+            fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, completed })
+            })
+            .then(r => r.json())
+            .then(() => {
+                document.getElementById('title').value = '';
+                document.getElementById('completed').checked = false;
+                loadTasks();
+            })
+            .catch(err => alert('Ошибка: ' + err));
+        }
+        loadTasks();
     </script>
 </body>
 </html>
